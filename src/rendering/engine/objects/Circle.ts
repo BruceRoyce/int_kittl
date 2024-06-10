@@ -11,42 +11,74 @@ export class Circle implements Object {
   color: string;
   private radius: number;
   private canvas: Canvas;
+  private center: { x: number; y: number } = { x: 0, y: 0 };
+  private arc: { start: number; end: number };
+  protected static isValid = true;
+  protected lastPos: { x: number; y: number } = { x: -1, y: -1 };
 
   constructor(data: ObjectData, canvas: Canvas) {
-    this.id = data.id;
-    this.top = data.top;
-    this.left = data.left;
-    this.color = data.color;
-    this.canvas = canvas;
-
     if (data.width !== data.height) {
+      Circle.isValid = false;
       throw new Error("Circle width and height must be equal");
     }
-    this.width = data.width;
-    this.height = data.height;
+    this.id = data.id;
     this.radius = data.width / 2;
+    this.canvas = canvas;
+    this.color = data.color;
+    this.top = data.top;
+    this.left = data.left;
+    this.setCenter();
+    this.arc = this.getArc();
+
+    if (this.lastPos.x === -1 || this.lastPos.y === -1) {
+      this.lastPos = { x: this.left, y: this.top };
+    }
+
+    // unnecessary
+    this.width = 0;
+    this.height = 0;
+  }
+
+  setCenter(): void {
+    this.center = {
+      x: this.radius - this.canvas.viewport.left + this.left,
+      y: this.radius - this.canvas.viewport.top + this.top,
+    };
   }
 
   setColor(color: string): void {
     this.color = color;
   }
 
+  getArc(): { start: number; end: number } {
+    return { start: 0, end: 2 * Math.PI };
+  }
+
   /**
    * render a circle on the canvas
    */
   render(ctx: CanvasRenderingContext2D): Promise<void> {
-    // calculate the center of the circle, adjust the position based on the viewport
-    const centerX = -this.canvas.viewport.left + this.left + this.radius;
-    const centerY = -this.canvas.viewport.top + this.top + this.radius;
-
     // log the position of the circle
-    console.log(`Circle ${this.id}: is rendered at position ${centerX} ${centerY} with the color ${this.color}`);
+
+    if (!Circle.isValid) return Promise.reject();
+
+    this.setCenter();
+
+    console.log(
+      `Circle ${this.id}: is rendered at position ${this.center.x} ${this.center.x} with the color ${this.color}`
+    );
 
     // draw the circle
     ctx.save();
     ctx.fillStyle = this.color;
     ctx.beginPath();
-    ctx.arc(centerX, centerY, this.radius, 0, 2 * Math.PI);
+    ctx.arc(
+      this.center.x,
+      this.center.y,
+      this.radius,
+      this.arc.start,
+      this.arc.end
+    );
     ctx.closePath();
     ctx.fill();
     ctx.restore();

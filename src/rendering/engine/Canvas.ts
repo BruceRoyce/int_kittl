@@ -1,4 +1,4 @@
-import { Object, ObjectData, ObjectType } from "./objects/Object";
+import { type Object, type ObjectData, ObjectType } from "./objects/Object";
 import { Circle } from "./objects/Circle";
 import { Illustration } from "./objects/Illustration";
 
@@ -28,26 +28,29 @@ export class Canvas {
     left: 0,
   };
   private dpr: number;
+  protected static ctx: CanvasRenderingContext2D | null = null;
+  protected static isValid = true;
 
-  constructor(
-    canvasElement: HTMLCanvasElement, 
-    objects: ObjectData[] = []
-  ) {
+  constructor(canvasElement: HTMLCanvasElement, objects: ObjectData[] = []) {
     this.canvasElement = canvasElement;
     this.objects = initializeObjects(objects, this);
 
     this.dpr = window.devicePixelRatio ?? 1;
-    this.canvasElement.setAttribute('width', (CANVAS_WIDTH * this.dpr).toString());
-    this.canvasElement.setAttribute('height', (CANVAS_HEIGHT * this.dpr).toString());
-
-    const ctx = this.canvasElement.getContext("2d");
-    if (ctx === null) {
-      throw new Error("Could not get canvas context");
-    }
-
-    ctx.scale(this.dpr, this.dpr);
+    this.canvasElement.setAttribute("width", `${CANVAS_WIDTH * this.dpr}`);
+    this.canvasElement.setAttribute("height", `${CANVAS_HEIGHT * this.dpr}`);
+    this.setCtx();
   }
 
+  setCtx() {
+    const ctx = this.canvasElement.getContext("2d");
+    if (ctx === null) {
+      Canvas.isValid = false;
+      throw new Error("Could not get canvas context");
+    } else {
+      ctx.scale(this.dpr, this.dpr);
+      Canvas.ctx = ctx;
+    }
+  }
   /**
    * update the color of an object
    */
@@ -63,19 +66,14 @@ export class Canvas {
    * clear the canvas element
    */
   public clear(ctx?: CanvasRenderingContext2D | null): void {
-    ctx = ctx ?? this.canvasElement.getContext("2d");
-    if (!ctx) {
+    ctx = ctx ?? Canvas.ctx;
+    if (!Canvas.isValid || !ctx) {
       throw new Error("Could not get canvas context");
     }
 
     ctx.save();
     ctx.resetTransform();
-    ctx.clearRect(
-      0,
-      0,
-      this.canvasElement.width,
-      this.canvasElement.height
-    );
+    ctx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
     ctx.restore();
   }
 
@@ -100,17 +98,16 @@ export class Canvas {
    * render all objects on the canvas
    */
   async render(): Promise<void> {
-    const ctx = this.canvasElement.getContext("2d");
-    if (ctx === null) {
+    if (!Canvas.ctx) {
       throw new Error("Could not get canvas context");
     }
 
     // clear the canvas from the last render
-    this.clear(ctx);
+    this.clear(Canvas.ctx);
 
     // render all objects
     for (const object of this.objects) {
-      await object.render(ctx);
+      await object.render(Canvas.ctx);
     }
   }
 }

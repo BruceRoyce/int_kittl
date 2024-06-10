@@ -1,4 +1,4 @@
-import { ObjectData, ObjectType } from "./engine/objects/Object";
+import { type ObjectData, ObjectType } from "./engine/objects/Object";
 
 let id = 0;
 const getId = (): number => {
@@ -57,6 +57,7 @@ const createIllustration = (): ObjectData[] => {
 };
 
 export const getInitialObjects = (): ObjectData[] => {
+  // this resets global id - could be a problem if we have multiple identical ids
   id = 0;
   return [
     {
