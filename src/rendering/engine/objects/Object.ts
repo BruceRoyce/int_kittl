@@ -27,21 +27,6 @@ export interface ObjectData {
  * Interface for all objects that can be rendered on the canvas
  */
 export interface Object extends ObjectData {
-  // id: number;
-  // type: ObjectType;
-
-  // /**
-  //  * position and size of the object
-  //  */
-  // top: number;
-  // left: number;
-  // width: number;
-  // height: number;
-
-  // /**
-  //  * color of the object
-  //  */
-  // color: string;
   /**
    * set the color of the object
    */

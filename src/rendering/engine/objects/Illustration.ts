@@ -26,6 +26,7 @@ export class Illustration implements Object {
     this.left = data.left;
     this.width = 0;
     this.height = 0;
+    this.setCommands();
     this.absPosAdjuster();
   }
 
@@ -92,9 +93,9 @@ export class Illustration implements Object {
     if (!this.isValid || !this.commands || !this.points)
       return Promise.reject();
     // log the command of the illustration
-    console.log(
-      `Illustration ${this.id}: is rendered with ${this.commands.length} commands with the color ${this.color}`
-    );
+    // console.log(
+    //   `Illustration ${this.id}: is rendered with ${this.commands.length} commands with the color ${this.color}`
+    // );
 
     this.absPosAdjuster();
     // draw the path

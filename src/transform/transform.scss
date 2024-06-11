@@ -44,3 +44,22 @@
     }
   }
 }
+
+.howItWorks {
+  font-size: 13px;
+  color: #5f6770;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  ul {
+    max-width: 450px;
+    text-align: start;
+    list-style-type: none;
+    padding: 12px;
+    border-left: 1px solid #ccc;
+    li {
+      margin: 8px 0;
+      span {
+        font-weight: bold;
+      }
+    }
+  }
+}

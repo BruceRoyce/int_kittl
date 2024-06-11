@@ -12,9 +12,8 @@ export class Circle implements Object {
   private radius: number;
   private canvas: Canvas;
   private center: { x: number; y: number } = { x: 0, y: 0 };
-  private arc: { start: number; end: number };
+  private arc = { start: 0, end: 2 * Math.PI };
   protected static isValid = true;
-  protected lastPos: { x: number; y: number } = { x: -1, y: -1 };
 
   constructor(data: ObjectData, canvas: Canvas) {
     if (data.width !== data.height) {
@@ -27,16 +26,9 @@ export class Circle implements Object {
     this.color = data.color;
     this.top = data.top;
     this.left = data.left;
+    this.width = data.width;
+    this.height = data.height;
     this.setCenter();
-    this.arc = this.getArc();
-
-    if (this.lastPos.x === -1 || this.lastPos.y === -1) {
-      this.lastPos = { x: this.left, y: this.top };
-    }
-
-    // unnecessary
-    this.width = 0;
-    this.height = 0;
   }
 
   setCenter(): void {
@@ -50,10 +42,6 @@ export class Circle implements Object {
     this.color = color;
   }
 
-  getArc(): { start: number; end: number } {
-    return { start: 0, end: 2 * Math.PI };
-  }
-
   /**
    * render a circle on the canvas
    */
@@ -64,9 +52,9 @@ export class Circle implements Object {
 
     this.setCenter();
 
-    console.log(
-      `Circle ${this.id}: is rendered at position ${this.center.x} ${this.center.x} with the color ${this.color}`
-    );
+    // console.log(
+    //   `Circle ${this.id}: is rendered at position ${this.center.x} ${this.center.x} with the color ${this.color}`
+    // );
 
     // draw the circle
     ctx.save();
