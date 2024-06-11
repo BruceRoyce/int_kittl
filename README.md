@@ -117,11 +117,11 @@ But the major issues lied in the object initilisers, where the least amount of i
 
 Many time-consuming computations were set to happen within th render method of each object, and most importntly, they were set to happen repeatedly for each traverse and points.
 
-For example I noticed the render methos of the `Illustration.ts` as to be like:
+For example I noticed the render methos of the `Illustration.ts` as to be like: (notice the red flags in the comments)
 
 ```javascript
 async render(ctx: CanvasRenderingContext2D): Promise<void> {
-    // NOTE: this is a very simple svg parser, that only works for the illustration.svg file
+    // 🚩 Bruce: this check could have happened earlier in life cycle
     const path = await this.loadIllustration();
     if (!path.startsWith("M") || !path.endsWith("Z")) {
       throw new Error("Invalid path");
@@ -129,15 +129,14 @@ async render(ctx: CanvasRenderingContext2D): Promise<void> {
     const commands = path.replace("M", "").replace("Z", "").split("L");
 
     // log the command of the illustration
-    console.log(
-      `Illustration ${this.id}: is rendered with ${commands.length} commands with the color ${this.color}`
-    );
+
 
     // draw the path
     ctx.save();
     ctx.fillStyle = this.color;
     ctx.beginPath();
 
+  // 🚩 Bruce:segregated logic hard to maintain and understand
     const firstCommand = commands.shift();
     // 🚩 Bruce: this check could have happened earlier in life cycle
     if (!firstCommand) {
