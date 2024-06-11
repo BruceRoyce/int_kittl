@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { ReactComponent as SampleText } from "@/../../.resources/sampleText.svg";
 import useWarp from "./hooks/useWarp";
 import "./transform.scss";
-
+import SVGContainer from "./components/SVGContainer";
+import HowItWorks from "./components/HowItWorks";
 /**
  * page for transforming the SVG
  */
@@ -29,14 +29,14 @@ function Transform() {
   return (
     <div className="transform">
       <h1>Transform</h1>
-
-      <SampleText
+      <SVGContainer
         ref={svgRef}
         width={svgData.width}
         height={svgData.height + svgData.vGap}
         viewBox={`${svgData.minX} ${svgData.vGap / -8} ${svgData.width} ${
           svgData.height + svgData.vGap / 2
         }`}
+        reset={value}
       />
       <p>Transforming SVG from sampleText.svg</p>
       <input
@@ -48,6 +48,8 @@ function Transform() {
       <button className="btn" onClick={handleResetButton}>
         Reset
       </button>
+      <div className="vSpacer" />
+      <HowItWorks />
       <div className="vSpacer" />
       <p className="sign">
         Tech Test for Kittl.com by Bruce Royce - 2024 -{" "}
