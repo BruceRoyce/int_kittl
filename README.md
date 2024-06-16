@@ -6,7 +6,7 @@
 
 Part 1, was improving performance of a simplified rendering engine on HTML canvas (2D).
 
-The original engine and setup was producing the image in total of about 1700ms (bad experience). The changes brough the total duration to about 160~170ms (acceptable performance), that's almost over 10 times faster.
+The original engine and setup was producing the image in total of about 1500-1700ms (bad experience). The changes brough the total duration to about 92~115ms (acceptable performance), that's almost over 10 times faster.
 
 ## Solution
 
@@ -14,7 +14,7 @@ The original engine and setup was producing the image in total of about 1700ms (
 
 ### Ovservation
 
-I was only allowed to make changes within the `engine` directory.
+I was only allowed to make (constructual) changes within the `engine` directory.
 
 ```
 └── 📁rendering
@@ -32,17 +32,15 @@ In `Canvas.ts` I noticed the canvas context was being unneccessarily regenerated
 
 #### Remedy for problem 1
 
-I changed this to be generated once when the class is being instantiated as a static field that could be accessed for a whole sesseion.
+I changed this to be generated once when the class is being instantiated as a static field that could be accessed for a whole sesseion via static `Canvas.ctx`.
 
-I kept the null checking only to stop the TypeScript from nagging about null possibility, although I could have forced not null (`!`) but I thought your TypeScript setting might not setup to appreciate not-null and error during compilation.
-
-The extra checks however can be safely removed.
+The extra null checks safely removed.
 
 A few other minor changes has applied (eg. importing types correctly, etc.) - Please see the PR
 
 **In short** the unneccessary canvas context creation is fixed
 
-#### Further Improvement
+#### Problem 2
 
 I noticed one of the longer renders are when the colour changes. This is linked to the logic of filtering the objects to get the target object.
 Currently, the logic loops through the whole set of objects.
@@ -53,7 +51,9 @@ This is because the `getInitialObjects()` returns an array.
 getInitialObjects() : ObjectData[]
 ```
 
-If the objects initilliser was indexed, looping through the objects to find the object_id was eliminated.
+#### Remedy to problem 2
+
+I updated the objects initilliser to be indexed by the `object.id`, looping through the entire objects each time to find the object_id was eliminated.
 
 For better understanding, please see bellow:
 
@@ -73,47 +73,25 @@ For better understanding, please see bellow:
 **✅ Performant (indexed)**
 
 ```typescript
-// Bruce: possiblly imporoved update color method that eliminates looping
-type IndexedObject = Map<number, Object>;
-const initializeObjects = (objects: ObjectData[], canvas: Canvas): IndexedObject => {
-  const indexed : IndexedObject = new Map();
-  objects.forEach((object) => {
-    if (object.type === ObjectType.Circle) {
-      indexed.set(object.id,new Circle(object, canvas));
-    }
-    if (object.type === ObjectType.Illustration) {
-      indexed.set(object.id,new Illustration(object, canvas));
-    }
-    throw new Error(`Unknown object type ${object.type}`);
-  });
-  return indexed;
-};
-
- updateColor(objectId: number, color: string): void {
-    // using js Map
-    // objects: Map<number, Object>;
-    const object = objects.get(objectID);
-    // or using js Objects
-    // objects: {[k:number]: Object}[];
-    // const object = objects[objectId]
-    if (!object) {
-      throw new Error(`Could not find object with id ${objectId}`);
-    }
-    object.setColor(color);
-  }
-
-  getObjects() : Object[] {
-    // return map to array for compatibility
+// Bruce: imporoved update color method that eliminates looping
+  updateColor(objectId: number, color: string): void {
+    this.objects[objectId]?.setColor(color);
   }
 ```
 
-I expect the above change to increase performance significantly, but the object initialiser is in `initialObjects.ts` that falls beyond the scope of this test.
+#### Other improvements:
+
+- All objects with `width` or `height` of `0`, are filteredd out because they won't draw anything but add to the load. (See `engine/utils/objectSanity/isObjectsane.ts`)
+
+- the canvas resolution is fixed to be only as large as necessary.
+
+- unnecessary steps in clearing the canvas was removed
 
 ### The major issue
 
 But the major issues lied in the object initilisers, where the least amount of initilisation and preperation for optimal rendering were in place.
 
-#### Problem
+#### Problem 1
 
 Many time-consuming computations were set to happen within th render method of each object, and most importntly, they were set to happen repeatedly for each traverse and points.
 
@@ -165,7 +143,7 @@ async render(ctx: CanvasRenderingContext2D): Promise<void> {
   }
 ```
 
-#### Remedy
+#### Remedy to problem 1
 
 Many of these calculations, such as extracting the commands and points are moved to earlier in the object life cycle, prepared for the renderer.
 
@@ -177,9 +155,16 @@ The absolute to relative poisition calculation needed to be fresh at the render 
 
 - the render methods are updated to follow a simpler and more straight-forward logics, and most importntly to take advantage of prepared data during the instantioation.
 
-#### Further imporvement
+#### Problem 2
 
-The setup can further improved if we set a flag to notify the renderer when `viewport` is set. With that the _absolute-to-relative_ calculations can be skipped where not neccessary (eg. when the colour is changed but not the position)
+I have added a check to skip rendering the shapes that are falling outside of the canvas visible area.
+via `isInView`. (See `engine/utils/camera.ts` function `isInView`)
+
+#### Other imporvements applied
+
+- The setup is improved to notify the renderer when `viewport` is changed. So the recalculation for the points positions ONLY happens when there is a camera movement, otherwise prepared data will be reused. (See `engine/utils/camera.ts` function `isCameraMoved`)
+
+- Invalidity checks brought to be executed as early as possible to avoid waste. ((See `engine/utils/objectSanity/isObjectSane.ts` function `isObjectValid`))
 
 # Part 2
 
@@ -187,37 +172,93 @@ The setup can further improved if we set a flag to notify the renderer when `vie
 
 Implement an Arch Transformation for the [provided svg file](.resources/sampleText.svg).
 
-<img width="936" alt="example" src="https://user-images.githubusercontent.com/577316/89522590-c02cdb00-d7e1-11ea-9a2a-bb3088caa71b.png">
-
-<img width="936" alt="Animated example" src="./.resources/ArchAnimated.gif">
-
 ## Solution
 
-![Part 2 - UI Screenshot](.resources/part_2_screenshot.png)
+![Part 2 - UI Screenshot](.resources/transforms.jpg)
 
 I create a simple UI as per the instruction.
 
-You can create it as a react component with a story that demonstrates how it works. <br />
+I also added a react component with a story that demonstrates how it works. <br />
 
-## Useful links
-
-### [paper.js](http://paperjs.org)
-
-### [warpjs](https://github.com/benjamminf/warpjs)
+<div className="howItWorks">
+      <h3>How It Works</h3>
+      <div className="">
+        <p>
+          The main logic are in <code>useWarp</code> and{" "}
+          <code>useTransformer</code> hooks, that use WarpJS to transform the
+          SVG
+        </p>
+        <ul>
+          <li>
+            On the first run, I grap the relaxed (reset) svg points. I calculate
+            the correct size of the shape and set the dimensions and the
+            viewport accordingly. Some gap (padding) is considered to house the
+            transformed svg.
+          </li>
+          <li>
+            The SVG is then transformed by the selected <code>transformer</code>{" "}
+            with its amplitude set by the range input (see
+            <code>useTransformer</code>):
+            <ul>
+              <li>
+                <b>Arc Transformer</b> (default) is sine wave added to the y
+                values. The sine wave is calculated by the formula{" "}
+                <code>
+                  <i>y = q * Math.sin((Math.PI / 2) * (x / midPoint))</i>
+                </code>{" "}
+                Here <code>q</code> is based on the given range and{" "}
+                <code>midPoint</code> is half of the <code>width</code>
+                of the SVG (offset by the smallest x).
+              </li>
+            </ul>
+          </ul>
+          <b>I added the following extra transformers for a bit of showin-off (I hope you don't mind!)</b>
+          <ul>
+            <ul>
+              <li>
+                <b>Flag Transformer</b> (just to show-off!) is also sine wave
+                added to the y values, with its <code>midPoint</code> set in
+                quarter of the <code>width</code>!
+              </li>
+              <li>
+                <b>Skew</b> (just to show-off!) uses a sloped line formula to
+                changes the y values on a slope:{" "}
+                <code>
+                  <i>y = a * x + y</i>
+                </code>
+              </li>
+              <li>
+                <b>Perspective X</b> (just to show-off!) also follows the sloped
+                line formula, with its baseline being the <code>midPoint</code>{" "}
+                in the SVG height. In addition to that, there is another scale
+                factor that boostes <code>y</code> value so to scale things up
+                as they diverge from eachother. I fond the height midpoint and
+                any y above that will slope-up and slope-down for the{" "}
+                <code>y</code>'s less than midpoint.
+              </li>
+            </ul>
+          </li>
+          <li>
+            The SVG is reset by the Reset button, which resets the SVG to its
+            original state.
+          </li>
+          <li className="special">
+            <b>The trick</b> is to <b>reset the SVG</b> to its original state
+            before applying each transformation, otherwise the transformation
+            goes out of hand as they will be added on the top of eachother
+          </li>
+        </ul>
+      </div>
+    </div>
 
 # General Requirements
 
-- The assignment should be completed in TypeScript using React.
-- Please work on a separate branch and [submit a Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) for review.
+- The assignment was completed in TypeScript using React.
 
 ## Available Scripts
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-In the project directory, you can run:
+Please use `yarn start` and open [http://localhost:3000](http://localhost:3000) to view it in the browser to see the buttons that redirect you to **Part 1** and **Part 2** of the challege solutions
 
-### `yarn start`
+Please let me know if there is any questions or anything is missing
 
-Runs the app in the development mode.
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.
+Thank you very much<br />Bruce Royce<br/>(bruceroyce@yahoo.com)

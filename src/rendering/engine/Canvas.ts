@@ -2,6 +2,8 @@ import { type Object, type ObjectData, ObjectType } from "./objects/Object";
 import { Circle } from "./objects/Circle";
 import { Illustration } from "./objects/Illustration";
 import { doesDarwAnything } from "./utils/objectSanity";
+import { render } from "react-dom";
+import { resolve } from "path";
 
 export const CANVAS_WIDTH = 600;
 export const CANVAS_HEIGHT = 400;
@@ -102,14 +104,20 @@ export class Canvas {
     if (!Canvas.ctx) {
       throw new Error("Could not get canvas context");
     }
-
-    // clear the canvas from the last render
-    this.clear();
-
-    // render all objects
-    // ✅ for loop is faster than forEach
-    for (const object of this.getObjects()) {
-      await object.render(Canvas.ctx!);
-    }
+    return new Promise(async (resolve, reject) => {
+      this.clear(); // clear the canvas from the last render
+      try {
+        const renderQueue = []; // catching promises
+        // ✅ for loop is faster than forEach
+        for (const object of this.getObjects()) {
+          renderQueue.push(await object.render(Canvas.ctx!));
+        }
+        await Promise.all(renderQueue).then(() => resolve());
+        // or await Promise.allSettled(renderQueue).then(() => resolve()) depending on the intention;
+      } catch (e) {
+        console.error("Error:", e);
+        return reject();
+      }
+    });
   }
 }
