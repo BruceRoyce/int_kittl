@@ -1,0 +1,107 @@
+@use "colour";
+@use "fonts";
+
+:root {
+  * {
+    padding: 0;
+    margin: 0;
+  }
+}
+html {
+  background-color: var(--page-bg);
+}
+#root {
+  width: 600px;
+  position: relative;
+  margin: 12px auto 0 auto;
+}
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.btn-wrapper {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 4px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  p {
+    @extend .roboto-light;
+    flex: 1 0 auto;
+  }
+}
+.btn-holder {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  width: 72px;
+  margin-top: 16px;
+
+  .btn {
+    $btn-size: 24px;
+    @extend .material-symbols-outlined;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    width: $btn-size;
+    height: $btn-size;
+    color: var(--btn);
+    background-color: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+    border-radius: 999px;
+    cursor: pointer;
+    &:hover {
+      color: white;
+      background-color: color-mix(in hsl longer hue, var(--btn-bg), black 20%);
+    }
+  }
+  .btn-name {
+    @extend .roboto-thin;
+    font-size: 10pt;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+.steps-grid {
+  margin: 4pt auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: flex-start;
+  align-items: center;
+  @extend .roboto-light;
+  font-size: 10pt;
+  width: 80ch;
+}
+.step-row {
+  $rowPadding: 4px;
+  background-color: var(--cnt-bg);
+  border-radius: 99px;
+  padding: $rowPadding $rowPadding * 2;
+  display: grid;
+  grid-template-columns: 1fr 100px;
+  width: 100%;
+  font-weight: 300;
+  &.head {
+    font-weight: 500;
+  }
+  div:last-child {
+    text-align: end;
+  }
+  &:last-child {
+    font-weight: 500;
+  }
+}
+
+canvas {
+  border: 1px solid black;
+  display: block;
+  background-color: white;
+  outline: 10px solid white;
+  box-shadow: 0 0 20px 10px rgba(0, 0, 0, 0.3);
+}
