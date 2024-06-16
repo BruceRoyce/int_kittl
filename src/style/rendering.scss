@@ -1,8 +1,14 @@
 @use "colour";
 @use "fonts";
+@use "buttons";
 
 :root {
-  * {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     padding: 0;
     margin: 0;
   }
@@ -10,12 +16,10 @@
 html {
   background-color: var(--page-bg);
 }
-#root {
+
+#rendering {
   width: 600px;
-  position: relative;
-  margin: 12px auto 0 auto;
-}
-main {
+  margin: 18px auto 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -41,24 +45,6 @@ main {
   width: 72px;
   margin-top: 16px;
 
-  .btn {
-    $btn-size: 24px;
-    @extend .material-symbols-outlined;
-    margin: 0;
-    display: grid;
-    place-items: center;
-    width: $btn-size;
-    height: $btn-size;
-    color: var(--btn);
-    background-color: var(--btn-bg);
-    border: 1px solid var(--btn-border);
-    border-radius: 999px;
-    cursor: pointer;
-    &:hover {
-      color: white;
-      background-color: color-mix(in hsl longer hue, var(--btn-bg), black 20%);
-    }
-  }
   .btn-name {
     @extend .roboto-thin;
     font-size: 10pt;

@@ -1,5 +1,6 @@
 @use "fonts";
 @use "colour";
+@use "buttons";
 
 html {
   background-color: var(--page-bg);
@@ -22,6 +23,7 @@ html {
   max-width: 1200px;
   margin: 0 auto;
   text-align: center;
+  gap: 16px;
   @extend .roboto-light;
   .rangeValue {
     @extend .roboto-semi;
@@ -65,19 +67,7 @@ html {
     background-color: var(--btn-bg);
   }
   .btn {
-    padding: 8px 16px;
-    margin: 8px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    cursor: pointer;
-    transition-duration: 100ms;
-    background-color: var(--btn-bg);
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
-    transition-duration: 200ms;
-    &:hover {
-      background-color: #5f5f5f;
-      color: #ececec;
-    }
+    @extend .btn-textual;
   }
   .sign {
     font-size: 12px;
@@ -94,6 +84,7 @@ html {
 }
 
 .howItWorks {
+  max-width: 768px;
   margin-top: 32px;
   font-size: 13px;
   color: #5f6770;

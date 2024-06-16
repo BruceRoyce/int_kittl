@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { renderSteps } from "./renderSteps";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, Canvas } from "./engine/Canvas";
+import BackButton from "../components/BackButton";
 import "../style/rendering.scss";
 
 const wait = async (delay: number) => {
@@ -109,7 +110,7 @@ function Rendering() {
   };
 
   return (
-    <main>
+    <main id="rendering">
       <canvas
         ref={canvasElement}
         style={{
@@ -117,43 +118,29 @@ function Rendering() {
           height: CANVAS_HEIGHT,
         }}
       />
-
       <div className="btn-wrapper">
         <p>
           Viewport: ({canvas.current?.viewport.left},{" "}
           {canvas.current?.viewport.top})
         </p>
-        <div className="btn-holder">
-          <button
-            className="btn"
-            onClick={handleStart}
-            disabled={testing !== null || isFinished()}
-          >
-            play_arrow
-          </button>
-          <div className="btn-name">Start</div>
-        </div>
-        <div className="btn-holder">
-          <button
-            className="btn"
-            onClick={handleReset}
-            disabled={testing === "full" || processingStep}
-          >
-            restart_alt
-          </button>
-          <div className="btn-name">Reset</div>
-        </div>
-
-        <div className="btn-holder">
-          <button
-            className="btn"
-            onClick={handleNextStep}
-            disabled={testing === "full" || isFinished()}
-          >
-            skip_next
-          </button>
-          <div className="btn-name">Next Step</div>
-        </div>
+        <Btn
+          onClick={handleStart}
+          isDisabled={testing !== null || isFinished()}
+          icon="play_arrow"
+          name="Start"
+        />
+        <Btn
+          onClick={handleReset}
+          isDisabled={testing === "full" || processingStep}
+          icon="restart_alt"
+          name="Reset"
+        />
+        <Btn
+          onClick={handleNextStep}
+          isDisabled={testing === "full" || isFinished()}
+          icon="skip_next"
+          name="Next Step"
+        />
       </div>
       <div className="steps-grid">
         <div className="step-row head">
@@ -168,8 +155,27 @@ function Rendering() {
           </div>
         ))}
       </div>
+      <BackButton />
     </main>
   );
 }
 
 export default Rendering;
+
+type BtnPropsT = {
+  isDisabled: boolean;
+  onClick: () => void | Promise<void>;
+  icon: string;
+  name: string;
+};
+
+function Btn({ isDisabled, onClick, icon, name }: BtnPropsT) {
+  return (
+    <div className="btn-holder">
+      <button className="btn-iconic" onClick={onClick} disabled={isDisabled}>
+        {icon}
+      </button>
+      <div className="btn-name">{name}</div>
+    </div>
+  );
+}
