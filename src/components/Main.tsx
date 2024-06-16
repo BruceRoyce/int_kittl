@@ -2,7 +2,7 @@ import "../style/main.scss";
 
 export default function Main() {
   const handleClick = (url: string) => {
-    window.open(url);
+    window.location.href = url;
   };
   return (
     <main id="menu-page">

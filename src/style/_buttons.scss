@@ -20,6 +20,7 @@
 .btn-iconic {
   $btn-size: 24px;
   @extend .material-symbols-outlined;
+  padding: 0 !important;
   margin: 0;
   display: grid;
   place-items: center;

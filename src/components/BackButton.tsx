@@ -2,7 +2,7 @@ import "../style/main.scss";
 
 export default function BackButton() {
   const handleClick = () => {
-    window.open("/", "_self");
+    window.location.href = "/";
   };
   return (
     <div className="btn-back" onClick={() => handleClick()}>
