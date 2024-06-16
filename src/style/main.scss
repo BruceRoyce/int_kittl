@@ -1,0 +1,42 @@
+@use "buttons";
+@use "colour";
+@use "fonts";
+
+#menu-page {
+  text-align: center;
+  @extend .roboto-semi;
+  width: 600px;
+  margin: 24px auto 0 auto;
+}
+.vSpacer {
+  height: 25px;
+}
+.announcement {
+  padding: 16px;
+  border: 1px solid rgb(186, 167, 144);
+  border-radius: 8px;
+  margin: 24px auto;
+  a {
+    font-size: 80%;
+    text-decoration: none;
+    color: inherit;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+.ttl {
+  @extend .roboto-light;
+  margin-bottom: 24px;
+}
+.btn-wrapper {
+  display: flex;
+  gap: 12px;
+  .btn {
+    flex: 1 0 100px;
+    @extend .btn-textual;
+    @extend .roboto-semi;
+    display: grid;
+    place-items: center;
+  }
+}
