@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { renderSteps } from "./renderSteps";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, Canvas } from "./engine/Canvas";
-import "./index.css";
+import "../style/rendering.scss";
 
 const wait = async (delay: number) => {
   return new Promise((resolve) => setTimeout(resolve, delay));
@@ -40,7 +40,7 @@ function Rendering() {
         ),
       },
     ]);
-  }
+  };
 
   const handleStart = async () => {
     setTesting("full");
@@ -52,10 +52,7 @@ function Rendering() {
         canvasElement.current
       );
       const duration = new Date().getTime() - startTime;
-      setDurations((timings) => [
-        ...timings,
-        { label: entry.label, duration },
-      ]);
+      setDurations((timings) => [...timings, { label: entry.label, duration }]);
       // Small wait between steps to get more consistent results
       await wait(500);
     }
@@ -112,7 +109,7 @@ function Rendering() {
   };
 
   return (
-    <>
+    <main>
       <canvas
         ref={canvasElement}
         style={{
@@ -120,47 +117,58 @@ function Rendering() {
           height: CANVAS_HEIGHT,
         }}
       />
-      <p>
-        Viewport: ({canvas.current?.viewport.left},{" "}
-        {canvas.current?.viewport.top})
-      </p>
-      <button
-        onClick={handleStart}
-        style={{ marginRight: "10px" }}
-        disabled={testing !== null || isFinished()}
-      >
-        Start Test
-      </button>
-      <button
-        onClick={handleReset}
-        style={{ marginRight: "10px" }}
-        disabled={testing === "full" || processingStep}
-      >
-        Reset
-      </button>
-      <button
-        onClick={handleNextStep}
-        disabled={testing === "full" || isFinished()}
-      >
-        Next Step
-      </button>
-      <table>
-        <thead>
-          <tr>
-            <th>Step</th>
-            <th>Duration (ms)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {durations.map((duration) => (
-            <tr key={duration.label}>
-              <td>{duration.label}</td>
-              <td>{duration.duration}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </>
+
+      <div className="btn-wrapper">
+        <p>
+          Viewport: ({canvas.current?.viewport.left},{" "}
+          {canvas.current?.viewport.top})
+        </p>
+        <div className="btn-holder">
+          <button
+            className="btn"
+            onClick={handleStart}
+            disabled={testing !== null || isFinished()}
+          >
+            play_arrow
+          </button>
+          <div className="btn-name">Start</div>
+        </div>
+        <div className="btn-holder">
+          <button
+            className="btn"
+            onClick={handleReset}
+            disabled={testing === "full" || processingStep}
+          >
+            restart_alt
+          </button>
+          <div className="btn-name">Reset</div>
+        </div>
+
+        <div className="btn-holder">
+          <button
+            className="btn"
+            onClick={handleNextStep}
+            disabled={testing === "full" || isFinished()}
+          >
+            skip_next
+          </button>
+          <div className="btn-name">Next Step</div>
+        </div>
+      </div>
+      <div className="steps-grid">
+        <div className="step-row head">
+          <div>Step</div>
+          <div>Duration (ms)</div>
+        </div>
+
+        {durations.map((duration) => (
+          <div className="step-row" key={duration.label}>
+            <div>{duration.label}</div>
+            <div>{duration.duration}</div>
+          </div>
+        ))}
+      </div>
+    </main>
   );
 }
 

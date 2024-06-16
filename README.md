@@ -26,11 +26,11 @@ I was only allowed to make changes within the `engine` directory.
                 └── Object.ts
 ```
 
-#### Problem
+#### Problem 1
 
 In `Canvas.ts` I noticed the canvas context was being unneccessarily regenerated and error checked for every render that worked against performance.
 
-#### Remedy
+#### Remedy for problem 1
 
 I changed this to be generated once when the class is being instantiated as a static field that could be accessed for a whole sesseion.
 

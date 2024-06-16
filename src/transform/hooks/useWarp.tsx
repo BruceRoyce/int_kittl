@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, type RefObject } from "react";
+import type { SVGData } from "../types/svg";
 import Warp from "warpjs";
 
 export default function useWarp({
@@ -6,7 +7,7 @@ export default function useWarp({
 }: {
   svgRef: RefObject<SVGSVGElement>;
 }) {
-  const [svgData, setSvgData] = useState<Record<string, number>>({
+  const [svgData, setSvgData] = useState<SVGData>({
     minX: Number.MAX_VALUE,
     minY: Number.MAX_VALUE,
     maxX: Number.MIN_VALUE,

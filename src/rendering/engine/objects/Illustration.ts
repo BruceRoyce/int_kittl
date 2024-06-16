@@ -1,33 +1,39 @@
 import { Canvas } from "../Canvas";
+import { isObjectValid } from "../utils/objectSanity";
+import { isCameraMoved, isInView, type CameraPosition } from "../utils/camera";
 import { type Object, type ObjectData, type Point, ObjectType } from "./Object";
 
 export class Illustration implements Object {
-  id: number;
-  type = ObjectType.Illustration;
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-  color: string;
-  private canvas: Canvas;
-  private commands: string[];
-  private points: Point[];
-  protected isValid: boolean;
-  private canPosAdjuster: Record<string, number> = { left: 0, top: 0 };
+  public type = ObjectType.Illustration;
+  public id; // types from the implemented interface
+  public top;
+  public left;
+  public width;
+  public height;
+  public color;
+
+  public cameraPosition = { left: 0, top: 0 };
+  public isValid = false;
+  public isInView = true;
+
+  // properties not in the interface
+  public path: string = "";
+  public commands: string[] = [];
+  public canvas: Canvas;
+  private points: Point[] = [];
+  private pointsReposition: CameraPosition = { left: 0, top: 0 };
 
   constructor(data: ObjectData, canvas: Canvas) {
-    this.isValid = true;
-    this.commands = [];
-    this.points = [];
+    this.setCommands();
     this.color = data.color;
     this.canvas = canvas;
     this.id = data.id;
     this.top = data.top;
     this.left = data.left;
-    this.width = 0;
-    this.height = 0;
-    this.setCommands();
-    this.absPosAdjuster();
+    this.width = data.width;
+    this.height = data.height;
+    this.reposition();
+    this.checkInView();
   }
 
   setColor(color: string): void {
@@ -35,21 +41,17 @@ export class Illustration implements Object {
   }
 
   async setCommands(): Promise<void> {
-    const path = await this.loadIllustration();
-    if (!this.isPathValid(path)) {
-      this.isValid = false;
-      throw new Error("Invalid path");
-    } else {
-      this.commands = path
-        .replace("M", "")
-        .replace("Z", "")
-        .split("L")
-        .filter((c) => Boolean(c));
-      this.setPoints();
-    }
+    this.path = await this.loadIllustration();
+    this.checkValidity();
+    this.commands = this.path
+      .replace("M", "")
+      .replace("Z", "")
+      .split("L")
+      .filter((c) => Boolean(c));
+    this.setPoints();
   }
 
-  async setPoints(): Promise<void> {
+  private async setPoints(): Promise<void> {
     const points: Point[] = [];
     for (const command of this.commands) {
       const [x, y] = command.split(",").map((c) => parseInt(c));
@@ -58,12 +60,8 @@ export class Illustration implements Object {
     this.points = points;
   }
 
-  private isPathValid(path: string): boolean {
-    return path.startsWith("M") && path.endsWith("Z");
-  }
-
-  private absPosAdjuster(): void {
-    this.canPosAdjuster = {
+  reposition(): void {
+    this.pointsReposition = {
       left: this.left - this.canvas.viewport.left,
       top: this.top - this.canvas.viewport.top,
     };
@@ -84,32 +82,54 @@ export class Illustration implements Object {
     return dAttribute!;
   }
 
-  /**
-   * render an illustration on the canvas
-   */
-  render(ctx: CanvasRenderingContext2D): Promise<void> {
-    // NOTE: this is a very simple svg parser, that only works for the illustration.svg file
+  checkValidity(): boolean {
+    const [isValid, error] = isObjectValid(this.type, this.path);
+    this.isValid = isValid;
+    if (!isValid && error) throw error;
+    return isValid;
+  }
 
-    if (!this.isValid || !this.commands || !this.points)
-      return Promise.reject();
+  checkInView() {
+    this.isInView = isInView(this, this.cameraPosition);
+  }
+
+  checkCamera() {
+    const pos = this.canvas.viewport;
+    if (
+      isCameraMoved({
+        object: this,
+        pos,
+      })
+    ) {
+      this.cameraPosition = pos;
+      this.reposition();
+      this.checkInView();
+    }
+  }
+
+  render(ctx: CanvasRenderingContext2D): Promise<void> {
+    if (!this.isValid) return Promise.reject();
+    this.checkCamera();
+    if (!this.isInView) return Promise.resolve();
+
     // log the command of the illustration
     // console.log(
     //   `Illustration ${this.id}: is rendered with ${this.commands.length} commands with the color ${this.color}`
     // );
 
-    this.absPosAdjuster();
     // draw the path
     ctx.save();
     ctx.fillStyle = this.color;
     ctx.beginPath();
 
-    let motion = 0;
-    for (const point of this.points) {
-      const [x, y] = point;
-      motion === 0
-        ? ctx.moveTo(x + this.canPosAdjuster.left, y + this.canPosAdjuster.top)
-        : ctx.lineTo(x + this.canPosAdjuster.left, y + this.canPosAdjuster.top);
-      motion++;
+    // ✅ `for of` is slightly faster than `forEach`
+    let idx = 0;
+    for (let point of this.points) {
+      point = [
+        point[0] + this.pointsReposition.left,
+        point[1] + this.pointsReposition.top,
+      ];
+      idx++ === 0 ? ctx.moveTo(...point) : ctx.lineTo(...point);
     }
 
     ctx.closePath();
