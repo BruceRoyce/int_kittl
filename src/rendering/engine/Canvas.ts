@@ -110,7 +110,7 @@ export class Canvas {
         for (const object of this.getObjects()) {
           renderQueue.push(await object.render(Canvas.ctx!));
         }
-        await Promise.all(renderQueue).then(() => resolve());
+        Promise.all(renderQueue).then(() => resolve());
         // or await Promise.allSettled(renderQueue).then(() => resolve()) depending on the intention;
       } catch (e) {
         console.error("Error:", e);
