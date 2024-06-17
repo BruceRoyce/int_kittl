@@ -12,7 +12,6 @@ const SVGContainer = forwardRef(function (
   props: SVGContainerProps,
   ref: LegacyRef<SVGSVGElement>
 ) {
-  // console.log("SVGContainer renered");
   return (
     <SampleText
       ref={ref}

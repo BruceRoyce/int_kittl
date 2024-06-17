@@ -108,33 +108,34 @@ export class Illustration implements Object {
   }
 
   render(ctx: CanvasRenderingContext2D): Promise<void> {
-    if (!this.isValid) return Promise.reject();
-    this.checkCamera();
-    if (!this.isInView) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      if (!this.isValid) return reject(); // rejects invalid shapes
+      this.checkCamera(); // checks camera motion and updates positions only when needed
+      if (!this.isInView) return resolve(); // resolves by skipping out of vision shapes
 
-    // log the command of the illustration
-    // console.log(
-    //   `Illustration ${this.id}: is rendered with ${this.commands.length} commands with the color ${this.color}`
-    // );
+      // log the command of the illustration
+      // console.log(
+      //   `Illustration ${this.id}: is rendered with ${this.commands.length} commands with the color ${this.color}`
+      // );
 
-    // draw the path
-    ctx.save();
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
+      // all good drawing the path
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
 
-    // ✅ `for of` is slightly faster than `forEach`
-    let idx = 0;
-    for (let point of this.points) {
-      point = [
-        point[0] + this.pointsReposition.left,
-        point[1] + this.pointsReposition.top,
-      ];
-      idx++ === 0 ? ctx.moveTo(...point) : ctx.lineTo(...point);
-    }
-
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-    return Promise.resolve();
+      // ✅ `for of` is slightly faster than `forEach`
+      let idx = 0;
+      for (let point of this.points) {
+        point = [
+          point[0] + this.pointsReposition.left,
+          point[1] + this.pointsReposition.top,
+        ];
+        idx++ === 0 ? ctx.moveTo(...point) : ctx.lineTo(...point);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      return resolve();
+    });
   }
 }

@@ -83,22 +83,25 @@ export class Circle implements Object {
   }
 
   render(ctx: CanvasRenderingContext2D): Promise<void> {
-    if (!this.isValid) return Promise.reject();
-    this.checkCamera();
-    if (!this.isInView) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      if (!this.isValid) reject(); // rejects invalid shapes
+      this.checkCamera(); // checks camera motion and updates positions only when needed
+      if (!this.isInView) resolve(); // resolves by skipping out of vision shapes
 
-    // console.log(
-    //   `Circle ${this.id}: is rendered at position ${this.center.x} ${this.center.x} with the color ${this.color}`
-    // );
+      // console.log(
+      //   `Circle ${this.id}: is rendered at position ${this.center.x} ${this.center.x} with the color ${this.color}`
+      // );
 
-    ctx.save();
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(...this.center, this.radius, this.arc.start, this.arc.end);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
+      // all good drawing the path
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.arc(...this.center, this.radius, this.arc.start, this.arc.end);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
 
-    return Promise.resolve();
+      return resolve();
+    });
   }
 }

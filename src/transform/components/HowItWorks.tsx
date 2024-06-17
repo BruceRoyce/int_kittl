@@ -10,6 +10,11 @@ const HowItWorks = () => {
           SVG
         </p>
         <ul>
+          <li className="special">
+            <b>The trick</b> is to <b>reset the SVG</b> to its original state
+            before applying each transformation, otherwise the transformation
+            goes out of hand as they will be added on the top of eachother.
+          </li>
           <li>
             On the first run, I grap the relaxed (reset) svg points. I calculate
             the correct size of the shape and set the dimensions and the
@@ -57,11 +62,6 @@ const HowItWorks = () => {
           <li>
             The SVG is reset by the Reset button, which resets the SVG to its
             original state.
-          </li>
-          <li className="special">
-            <b>The trick</b> is to <b>reset the SVG</b> to its original state
-            before applying each transformation, otherwise the transformation
-            goes out of hand as they will be added on the top of eachother
           </li>
         </ul>
       </div>
