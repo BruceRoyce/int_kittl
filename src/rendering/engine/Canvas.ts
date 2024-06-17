@@ -2,8 +2,6 @@ import { type Object, type ObjectData, ObjectType } from "./objects/Object";
 import { Circle } from "./objects/Circle";
 import { Illustration } from "./objects/Illustration";
 import { doesDarwAnything } from "./utils/objectSanity";
-import { render } from "react-dom";
-import { resolve } from "path";
 
 export const CANVAS_WIDTH = 600;
 export const CANVAS_HEIGHT = 400;
@@ -112,7 +110,7 @@ export class Canvas {
         for (const object of this.getObjects()) {
           renderQueue.push(await object.render(Canvas.ctx!));
         }
-        await Promise.all(renderQueue).then(() => resolve());
+        Promise.all(renderQueue).then(() => resolve());
         // or await Promise.allSettled(renderQueue).then(() => resolve()) depending on the intention;
       } catch (e) {
         console.error("Error:", e);
