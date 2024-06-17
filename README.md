@@ -1,20 +1,20 @@
-# Welcome to Kittl's frontend rendering assignment!
+# Welcome to Kittl's Frontend Rendering Assignment!
 
-# Part 1
+## Part 1
 
-## Challenge
+### Challenge
 
-Part 1, was improving performance of a simplified rendering engine on HTML canvas (2D).
+Part 1 involved improving the performance of a simplified rendering engine on HTML canvas (2D).
 
-The original engine and setup was producing the image in total of about 1500-1700ms (bad experience). The changes brough the total duration to about 92~115ms (acceptable performance), that's almost over 10 times faster.
+The original engine setup was producing the image in about 1500-1700ms (bad experience). The changes brought the total duration down to about 92~115ms (acceptable performance), which is almost 15 times faster. (flactuationg)
 
-## Solution
+### Solution
 
-![before and after optimisation](.resources/before_after.jpg)
+![Before and after optimization](.resources/before_after.jpg)
 
-### Ovservation
+#### Observation
 
-I was only allowed to make (constructual) changes within the `engine` directory.
+I was only allowed to make (constructive) changes within the `engine` directory.
 
 ```
 └── 📁rendering
@@ -28,24 +28,24 @@ I was only allowed to make (constructual) changes within the `engine` directory.
 
 #### Problem 1
 
-In `Canvas.ts` I noticed the canvas context was being unneccessarily regenerated and error checked for every render that worked against performance.
+In `Canvas.ts`, I noticed the canvas context was being unnecessarily regenerated and error checked for every render, which negatively impacted performance.
 
-#### Remedy for problem 1
+#### Remedy for Problem 1
 
-I changed this to be generated once when the class is being instantiated as a static field that could be accessed for a whole sesseion via static `Canvas.ctx`.
+I changed this to be generated once when the class is instantiated as a static field that could be accessed for an entire session via `Canvas.ctx`.
 
-The extra null checks safely removed.
+The extra null checks were safely removed.
 
-A few other minor changes has applied (eg. importing types correctly, etc.) - Please see the PR
+A few other minor changes were applied (e.g., importing types correctly, etc.) - Please see the PR.
 
-**In short** the unneccessary canvas context creation is fixed
+**In short**, the unnecessary canvas context creation is fixed.
 
 #### Problem 2
 
-I noticed one of the longer renders are when the colour changes. This is linked to the logic of filtering the objects to get the target object.
-Currently, the logic loops through the whole set of objects.
+I noticed one of the longer renders occurs when the color changes. This is linked to the logic of filtering the objects to get the target object.
+Currently, the logic loops through the entire set of objects.
 
-This is because the `getInitialObjects()` returns an array.
+This is because `getInitialObjects()` returns an array.
 
 ```typescript
 getInitialObjects() : ObjectData[]
@@ -53,9 +53,8 @@ getInitialObjects() : ObjectData[]
 
 #### Remedy to problem 2
 
-I updated the objects initilliser to be indexed by the `object.id`, looping through the entire objects each time to find the object_id was eliminated.
-
-For better understanding, please see bellow:
+I updated the object initializer to be indexed by object.id, eliminating the need to loop through the entire object set each time to find the `object_id`.
+For better understanding, please see below:
 
 **❌ Current**
 
@@ -81,21 +80,19 @@ For better understanding, please see bellow:
 
 #### Other improvements:
 
-- All objects with `width` or `height` of `0`, are filteredd out because they won't draw anything but add to the load. (See `engine/utils/objectSanity/isObjectsane.ts`)
-
-- the canvas resolution is fixed to be only as large as necessary.
-
-- unnecessary steps in clearing the canvas was removed
+- All objects with `width` or `height` of `0` are filtered out because they won't draw anything but add to the load. - (See `engine/utils/objectSanity/isObjectSane.ts`)
+- The canvas resolution is fixed to be only as large as necessary.
+- Unnecessary steps in clearing the canvas were removed.
 
 ### The major issue
 
-But the major issues lied in the object initilisers, where the least amount of initilisation and preperation for optimal rendering were in place.
+The major issues lied in the object initializers, where the least amount of initialization and preparation for optimal rendering were in place.
 
 #### Problem 1
 
-Many time-consuming computations were set to happen within th render method of each object, and most importntly, they were set to happen repeatedly for each traverse and points.
+Many time-consuming computations were set to happen within the render method of each object, and most importantly, they were set to happen repeatedly for each traverse and points.
 
-For example I noticed the render methos of the `Illustration.ts` as to be like: (notice the red flags in the comments)
+For example, I noticed the render method of Illustration.ts to be like: (notice the red flags in the comments)
 
 ```javascript
 async render(ctx: CanvasRenderingContext2D): Promise<void> {
@@ -142,95 +139,77 @@ async render(ctx: CanvasRenderingContext2D): Promise<void> {
 
 #### Remedy to problem 1
 
-Many of these calculations, such as extracting the commands and points are moved to earlier in the object life cycle, prepared for the renderer.
+Many of these calculations, such as extracting the commands and points, are moved earlier in the object life cycle, prepared for the renderer.
+The absolute to relative position calculation needed to be fresh at render time to accommodate camera movement.
+In short, two main improvements have been applied:
 
-The absolute to relative poisition calculation needed to be fresh at the render time to accommodate camera move.
+**The shape** class `constructor`s' are updated to handle as much preparation (pre-calculation) as possible for
 
-**In short** two main improvement have been applied:
-
-- The shapes class `constructor`s are updated to handle as many preperation (pre-calculation) as possible for the `render` method to take leverage when it is called.
-
-- the render methods are updated to follow a simpler and more straight-forward logics, and most importntly to take advantage of prepared data during the instantioation.
+- the `render` method to leverage when called.
+- The `render` methods are updated to follow simpler and more straightforward logic, and most importantly, to take advantage of prepared data during instantiation.
 
 #### Problem 2
 
 I have added a check to skip rendering the shapes that are falling outside of the canvas visible area.
-via `isInView`. (See `engine/utils/camera.ts` function `isInView`)
+I added a check to skip rendering shapes that fall outside the canvas visible area via `isInView`. (See `engine/utils/camera.ts` function `isInView`)
+
 ![Out of vision check function](.resources/oov-check.jpg)
-If not in view, a flag is being set and renderer safely skipps the rendering while still resolving the render promise.
+
+If not in view, a flag is set and the renderer safely skips rendering while still resolving the render promise.
 
 #### Other imporvements applied
 
-- The setup is improved to notify the renderer when `viewport` is changed. So the recalculation for the points positions ONLY happens when there is a camera movement, otherwise prepared data will be reused. (See `engine/utils/camera.ts` function `isCameraMoved`)
+- The setup is improved to notify the renderer when `viewport` is changed. The recalculation for point positions _ONLY_ happens when there is camera movement; otherwise, prepared data is reused. (See `engine/utils/camera.ts` function `isCameraMoved`)
+- Invalidity checks are executed as early as possible to avoid waste. (See `engine/utils/objectSanity/isObjectSane.ts` function `isObjectValid`)
 
-- Invalidity checks brought to be executed as early as possible to avoid waste. ((See `engine/utils/objectSanity/isObjectSane.ts` function `isObjectValid`))
+## Part 2
 
-# Part 2
+### Challenge
 
-## Challenge
+Implement an Arch Transformation for the provided SVG file.
 
-Implement an Arch Transformation for the [provided svg file](.resources/sampleText.svg).
+### Solution
 
-## Solution
+I also added a React component with a story that demonstrates how it works.
 
-![Part 2 - UI Screenshot](.resources/transforms.jpg)
+![SVG transformation screenshot](.resources/transforms.jpg)
 
-I create a simple UI as per the instruction.
+### How It Works
 
-I also added a react component with a story that demonstrates how it works. <br />
+**The trick** is to **reset the SVG** to its original state before applying each transformation; otherwise, the transformations will compound.
 
-<div className="howItWorks">
-<h3>How It Works</h3>
+The main logic is in the `useWarp` and `useTransformer` hooks, which use WarpJS to transform the SVG.
 
-<b>The trick</b> is to <b>reset the SVG</b> to its original state before applying each transformation, otherwise the transformation goes out of hand as they will be added on the top of eachother.
+- On the first run, I grab the relaxed (reset) SVG points. I calculate the correct size of the shape and set the dimensions and viewport accordingly. Some gap (padding) is considered to house the transformed SVG.
 
-The main logic are in useWarp and `useTransformer` hooks, that use WarpJS to transform the
-SVG
+- The SVG is then transformed by the selected `transformer` with its amplitude set by the range input (see `useTransformer`):
 
-- On the first run, I grap the relaxed (reset) svg points. I calculate
-  the correct size of the shape and set the dimensions and the
-  viewport accordingly. Some gap (padding) is considered to house the
-  transformed svg.
+  - **Arc Transformer (default)** is a sine wave added to the y values. The sine wave is calculated by the formula: `y = q * Math.sin((Math.PI / 2) * (x / midPoint))`. Here, `q` is based on the given range, and `midPoint` is half of the `width` of the SVG (offset by the smallest x).
 
-- The SVG is then transformed by the selected `transformer`
-  with its amplitude set by the range input (see
-  `useTransformer`):
+🙋🏻‍♂️ **I added the following extra transformers for a bit of showing off (I hope you don't mind!)**
 
-  - <b>Arc Transformer (default)</b> is sine wave added to the y
-    values. The sine wave is calculated by the formula
-    `  <i>y = q * Math.sin((Math.PI / 2) * (x / midPoint))</i>`
-    Here `q` is based on the given range and
-    `midPoint` is half of the `width`
-    of the SVG (offset by the smallest x).
+- **Flag Transformer** (just to show off!) is also a sine wave added to the y values, with its `midPoint` set to a quarter of the `width`!
 
-🙋🏻‍♂️ <b>I added the following extra transformers for a bit of showin-off (I hope you don't mind!)</b>
+- **Skew** (just to show off!) uses a sloped line formula to change the y values on a slope: `y = a * x + y`.
 
-- <b>Flag Transformer</b> (just to show-off!) is also sine wave
-  added to the y values, with its `midPoint` set in
-  quarter of the `width`!
-
-- <b>Skew</b> (just to show-off!) uses a sloped line formula to
-  changes the y values on a slope:
-  `  <i>y = a * x + y</i>`
-
-- <b>Perspective X</b> (just to show-off!) also follows the sloped line formula, with its baseline being the `midPoint`in the SVG height. In addition to that, there is another scale
-  factor that boostes `y` value so to scale things up as they diverge from eachother. I fond the height midpoint and
-  any y above that will slope-up and slope-down for the `y`'s less than midpoint.
+- **Perspective X** (just to show off!) also follows the sloped line formula, with its baseline being the `midPoint` in the SVG height. In addition, there is another scale factor that boosts the `y` value to scale things up as they diverge from each other. I found the height midpoint, and any y above that will slope up, while any y below that will slope down.
 
 ### Resting SVG
 
-The SVG is reset by the Reset button, which resets the SVG to its
-original state.
+The SVG is reset by the Reset button, which resets the SVG to its original state.
 
-# General
+## General
 
 - The assignment was completed in TypeScript using React.
 
-## Running the code
+### Running the Code
 
-Please use `yarn start` and open [http://localhost:3000](http://localhost:3000) to view it in the browser to see the buttons that redirect you to **Part 1** and **Part 2** of the challege solutions
+Please use `yarn start` and open [http://localhost:3000](http://localhost:3000) to view it in the browser. You will see buttons that redirect you to **Part 1** and **Part 2** of the challenge solutions.
 
-<hr />
-Please let me know if there is any questions or anything is missing
+---
 
-Thank you very much<br />Bruce Royce<br/>(bruceroyce@yahoo.com)
+Please let me know if you have any questions or if anything is missing.
+
+Thank you very much!<br>
+Bruce Royce<br>
+(bruceroyce@yahoo.com)

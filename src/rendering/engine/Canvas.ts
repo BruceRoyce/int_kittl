@@ -2,8 +2,6 @@ import { type Object, type ObjectData, ObjectType } from "./objects/Object";
 import { Circle } from "./objects/Circle";
 import { Illustration } from "./objects/Illustration";
 import { doesDarwAnything } from "./utils/objectSanity";
-import { render } from "react-dom";
-import { resolve } from "path";
 
 export const CANVAS_WIDTH = 600;
 export const CANVAS_HEIGHT = 400;
