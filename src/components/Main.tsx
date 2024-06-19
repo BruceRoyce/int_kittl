@@ -1,8 +1,10 @@
+import { useNavigate } from "react-router-dom";
 import "../style/main.scss";
 
 export default function Main() {
+  const nav = useNavigate();
   const handleClick = (url: string) => {
-    window.location.href = url;
+    nav(url);
   };
   return (
     <main id="menu-page">

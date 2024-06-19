@@ -1,8 +1,10 @@
+import { useNavigate } from "react-router-dom";
 import "../style/main.scss";
 
 export default function BackButton() {
+  const nav = useNavigate();
   const handleClick = () => {
-    window.location.href = "/";
+    nav("/");
   };
   return (
     <div className="btn-back" onClick={() => handleClick()}>
