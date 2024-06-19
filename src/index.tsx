@@ -11,11 +11,11 @@ const router = createBrowserRouter([
     element: <Main />,
   },
   {
-    path: "/rendering",
+    path: "rendering/",
     element: <Rendering />,
   },
   {
-    path: "/transform",
+    path: "transform/",
     element: <Transform />,
   },
 ]);

@@ -60,7 +60,9 @@ function Rendering() {
 
     updateTotalDuration();
 
-    setTesting(null);
+    // setTesting((old) => {
+    //   return old !== null ? null : old;
+    // });
   };
 
   const handleNextStep = async () => {

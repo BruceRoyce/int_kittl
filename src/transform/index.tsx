@@ -44,9 +44,9 @@ function Transform() {
           ref={svgRef}
           width={svgData.width}
           height={svgData.height + svgData.vGap}
-          viewBox={`${svgData.minX} ${svgData.vGap / -8} ${svgData.width} ${
-            svgData.height + svgData.vGap / 2
-          }`}
+          viewBox={`${svgData.minX} ${
+            svgData.vGap !== 0 ? svgData.vGap / -8 : 0
+          } ${svgData.width} ${svgData.height + svgData.vGap / 2}`}
           reset={range}
         />
       </div>

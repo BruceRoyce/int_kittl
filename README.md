@@ -1,5 +1,9 @@
 # Welcome to Kittl's Frontend Rendering Assignment!
 
+### Please see the deployed code in action here: [https://kittl.netlify.app/](https://kittl.netlify.app/)
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/2c302e52-7a7d-4171-b0b5-0098e023ee04/deploy-status)](https://app.netlify.com/sites/kittl/deploys)
+
 ## Part 1
 
 ### Challenge

@@ -113,7 +113,8 @@ export class Canvas {
         Promise.all(renderQueue).then(() => resolve());
         // or await Promise.allSettled(renderQueue).then(() => resolve()) depending on the intention;
       } catch (e) {
-        console.error("Error:", e);
+        if (!e) return resolve();
+        console.error("Canvas renderer catched error:", e);
         return reject();
       }
     });
